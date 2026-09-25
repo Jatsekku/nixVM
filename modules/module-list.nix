@@ -1,0 +1,12 @@
+[
+  ./hardware/channels
+  ./hardware/cpu.nix
+  ./hardware/disks.nix
+  ./hardware/displays
+  ./hardware/host-devices
+  ./hardware/network
+  ./hardware/ram.nix
+  ./hooks.nix
+  ./os
+  ./uuid.nix
+]
