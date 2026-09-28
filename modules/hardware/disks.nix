@@ -1,4 +1,10 @@
-{ config, lib, ... }:
+{
+  config,
+  hostConfig,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 with types;
 let
@@ -29,6 +35,18 @@ let
         default = null;
         description = "Controller bus type for the disk.";
       };
+
+      # Disk creation
+      create = mkOption {
+        type = bool;
+        default = false;
+        description = "Whether NixOS should automatically create the disk image if it does not exist.";
+      };
+      size = mkOption {
+        type = nullOr str;
+        default = null;
+        description = "Size of the disk to create (e.g. '20G', '500M')";
+      };
     };
   };
 in
@@ -43,5 +61,19 @@ in
 
   config = {
     _internalVmConfig.disks = cfg;
+
+    _nixVirtSpec =
+      let
+        vmCfg = config._internalVmConfig;
+
+        nixVmLib = import ./../lib { inherit lib pkgs; };
+        inherit (nixVmLib.disks) mkDisks;
+        disks = mkDisks vmCfg.disks;
+      in
+      {
+        devices = {
+          disk = disks;
+        };
+      };
   };
 }

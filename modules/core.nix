@@ -3,10 +3,14 @@
   lib,
   pkgs,
   hostConfig,
+  name,
   ...
 }:
 with lib;
 with types;
+let
+  vmCfg = config._internalVmConfig;
+in
 {
   imports = import ./module-list.nix;
 
@@ -15,28 +19,33 @@ with types;
       type = attrs;
       default = { };
       internal = true;
+      description = "Internal source of truth for VM definition";
     };
 
-    _nixVirtSpecification = mkOption {
-      type = attrs;
+    _nixVirtSpec = mkOption {
+      type = types.mkOptionType {
+        name = "recursiveAttrs";
+        description = "Attribute set with recursive merging";
+        check = isAttrs;
+        merge = loc: defs: foldl' recursiveUpdate { } (map (d: d.value) defs);
+      };
       default = { };
       internal = true;
+      description = "VM definition for NixVirt";
     };
   };
 
   config = {
-    _nixVirtSpecification = {
-      name = "validBareMinimum";
-      type = "kvm";
-      uuid = "fbe91dfd-fdd9-2e31-1420-50ebf6599a91";
+    _internalVmConfig.name = name;
 
-      memory = {
-        count = 1;
-        unit = "GiB";
-      };
+    _nixVirtSpec = {
+      name = vmCfg.name;
 
       os = {
-        type = "hvm";
+        boot = [
+          { dev = "hd"; }
+          { dev = "cdrom"; }
+        ];
       };
     };
   };

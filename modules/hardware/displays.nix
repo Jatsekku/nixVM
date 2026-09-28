@@ -1,8 +1,15 @@
-{ config, lib, ... }:
+{
+  config,
+  hostConfig,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 with types;
 let
   cfg = config.hardware.displays;
+  vmCfg = config._internalVmConfig;
 
   displayType = submodule {
     options = {
@@ -22,6 +29,17 @@ let
       };
     };
   };
+
+  mkGraphicsSpice =
+    { ... }:
+    {
+      type = "spice";
+      autoport = true;
+      image = {
+        compression = "off";
+      };
+    };
+
 in
 {
   options = {
@@ -31,4 +49,5 @@ in
       description = "List of virtual displays provided for the VM.";
     };
   };
+
 }
