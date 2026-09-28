@@ -9,6 +9,11 @@
       url = "github:AshleyYakeley/NixVirt";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    looking-glass = {
+      url = "github:Jatsekku/looking-glass";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

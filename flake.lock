@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "looking-glass": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790586626,
+        "narHash": "sha256-vFtUqDNRhga6TXp9JWWJnPHAJfzWNCqevj4qEdxEq70=",
+        "owner": "Jatsekku",
+        "repo": "looking-glass",
+        "rev": "d88ef3a9c8fd198bfd815cffcd30efe7ccd95962",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Jatsekku",
+        "repo": "looking-glass",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1790238896,
@@ -38,6 +58,7 @@
     },
     "root": {
       "inputs": {
+        "looking-glass": "looking-glass",
         "nixpkgs": "nixpkgs",
         "nixvirt": "nixvirt"
       }
