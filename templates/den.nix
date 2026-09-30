@@ -19,6 +19,7 @@
           ];
           displays = [
             { backend = "spice"; }
+            { backend = "loooking-glass"; }
           ];
         };
       };

@@ -5,25 +5,34 @@
   pkgs,
   ...
 }:
+with builtins;
 with lib;
 with types;
 let
-  cfg = config.hardware.cpu;
+  cfg = config.hardware;
 
-  allowedArchs = [
-    "x86_64"
-    "aarch64"
-  ];
-  allowedArchsStr = concatStringsSep ", " allowedArchs;
+  nixVmLib = import ./../lib { inherit lib pkgs; };
+  inherit (nixVmLib.misc) getHostArch;
+
+  hostSystem = pkgs.stdenv.hostPlatform.system;
+  hostArch = getHostArch hostSystem;
 in
 {
   options = {
     hardware.cpu = {
-      arch = mkOption {
-        type = enum allowedArchs;
-        default = "x86_64";
-        description = "CPU architecture for the VM. Allowed values: ${allowedArchsStr}";
-      };
+      arch =
+        let
+          allowedArchs = [
+            "x86_64"
+            "aarch64"
+          ];
+          allowedArchsStr = concatStringsSep ", " allowedArchs;
+        in
+        mkOption {
+          type = enum allowedArchs;
+          default = hostArch; # Use host architecture as default
+          description = "CPU architecture for the VM. Allowed values: ${allowedArchsStr}";
+        };
       cores = mkOption {
         type = ints.positive;
         default = 2;
@@ -38,26 +47,14 @@ in
   };
 
   config = {
-    _internalVmConfig.cpu = {
-      cores = cfg.cores;
-      arch = cfg.arch;
-      machine = cfg.machine;
-    };
+    _internalVmConfig.cpu = cfg.cpu;
 
     _nixVirtSpec =
       let
         vmCfg = config._internalVmConfig;
 
-        nixVmLib = import ./../lib { inherit lib pkgs; };
-        inherit (nixVmLib.misc)
-          getHostArch
-          getHostOS
-          getHypervisorType
-          getMachineType
-          ;
+        inherit (nixVmLib.misc) getHostOS getHypervisorType getMachineType;
 
-        hostSystem = pkgs.stdenv.hostPlatform.system;
-        hostArch = getHostArch hostSystem;
         hostOS = getHostOS hostSystem;
         hypervisorType = getHypervisorType hostOS hostArch vmCfg.cpu.arch;
         machineType = getMachineType vmCfg.cpu.machine vmCfg.cpu.arch;

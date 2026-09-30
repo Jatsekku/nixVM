@@ -64,16 +64,19 @@ let
       bus ? null,
       ...
     }:
-    if diskType.isIso then
-      "sata"
-    else if diskType.isNvme then
-      "nvme"
-    else if diskType.isBlock then
-      "sata"
-    else if bus != null then
-      bus
-    else
-      "virtio";
+    let
+      /*nixfmt:disable*/
+      rules = [
+        { cond = bus != null; inherit bus; }
+        { cond = diskType.isIso; bus = "sata"; }
+        { cond = diskType.isNvme; bus = "nvme"; }
+        { cond = diskType.isBlock; bus = "sata"; }
+      ];
+      busFallback = "virtio";
+      /*nixfmt:enable*/
+      matched = lib.findFirst (r: r.cond) { bus = busFallback; } rules;
+    in
+    matched.bus;
 in
 {
   inherit mkDisk;
@@ -101,6 +104,7 @@ in
               path,
               serial ? null,
               bus ? null,
+              ...
             }:
             let
               diskType = getDiskType path;

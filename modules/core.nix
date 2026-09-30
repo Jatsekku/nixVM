@@ -1,15 +1,15 @@
 {
   config,
-  lib,
-  pkgs,
   hostConfig,
+  lib,
   name,
+  pkgs,
   ...
 }:
+with builtins;
 with lib;
 with types;
 let
-  vmCfg = config._internalVmConfig;
 in
 {
   imports = import ./module-list.nix;
@@ -20,6 +20,13 @@ in
       default = { };
       internal = true;
       description = "Internal source of truth for VM definition";
+    };
+
+    _internalHostConfig = mkOption {
+      type = attrs;
+      default = { };
+      internal = true;
+      description = "Internal source of truth for host config";
     };
 
     _nixVirtSpec = mkOption {
@@ -38,15 +45,19 @@ in
   config = {
     _internalVmConfig.name = name;
 
-    _nixVirtSpec = {
-      name = vmCfg.name;
+    _nixVirtSpec =
+      let
+        vmCfg = config._internalVmConfig;
+      in
+      {
+        name = vmCfg.name;
 
-      os = {
-        boot = [
-          { dev = "hd"; }
-          { dev = "cdrom"; }
-        ];
+        os = {
+          boot = [
+            { dev = "hd"; }
+            { dev = "cdrom"; }
+          ];
+        };
       };
-    };
   };
 }

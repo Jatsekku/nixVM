@@ -5,10 +5,14 @@
   pkgs,
   ...
 }:
+with builtins;
 with lib;
 with types;
 let
-  cfg = config.hardware.disks;
+  cfg = config.hardware;
+
+  nixVmLib = import ./../lib { inherit lib pkgs; };
+  inherit (nixVmLib.disks) mkDisks;
 
   diskType = submodule {
     options = {
@@ -60,19 +64,15 @@ in
   };
 
   config = {
-    _internalVmConfig.disks = cfg;
+    _internalVmConfig.disks = cfg.disks;
 
     _nixVirtSpec =
       let
         vmCfg = config._internalVmConfig;
-
-        nixVmLib = import ./../lib { inherit lib pkgs; };
-        inherit (nixVmLib.disks) mkDisks;
-        disks = mkDisks vmCfg.disks;
       in
       {
         devices = {
-          disk = disks;
+          disk = mkDisks vmCfg.disks;
         };
       };
   };

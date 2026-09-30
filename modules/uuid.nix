@@ -1,13 +1,17 @@
-{ config, lib, ... }:
+{
+  config,
+  hostConfig,
+  lib,
+  pkgs,
+  ...
+}:
+with builtins;
 with lib;
 with types;
 let
   cfg = config;
-  vmCfg = config._internalVmConfig;
 
   nixVmLib = import ./lib { inherit lib pkgs; };
-  mkUuid = nixVmLib.misc.mkUuid;
-  effectiveUuid = if cfg.uuid != null then cfg.uuid else mkUuid vmCfg.name;
 in
 {
   options = {
@@ -19,10 +23,18 @@ in
   };
 
   config = {
-    _internalVmConfig.uuid = effectiveUuid;
+    _internalVmConfig.uuid = cfg.uuid;
 
-    _nixVirtSpec = {
-      uuid = vmCfg.uuid;
-    };
+    _nixVirtSpec =
+      let
+        vmCfg = config._internalVmConfig;
+
+        inherit (nixVmLib.misc) mkUuid;
+
+        uuid = if vmCfg.uuid != null then vmCfg.uuid else (mkUuid vmCfg.name);
+      in
+      {
+        inherit uuid;
+      };
   };
 }

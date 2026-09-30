@@ -9,28 +9,6 @@
     in
     "${sub 0 8}-${sub 8 4}-${sub 12 4}-${sub 16 4}-${sub 20 12}";
 
-  # Normalize RAM param
-  normalizeMemory =
-    memory:
-    if builtins.isInt memory then
-      {
-        count = memory;
-        unit = "GiB";
-      }
-    else
-      memory;
-
-  # Normalize vCPU param
-  normalizeVcpu =
-    vcpu:
-    if builtins.isInt vcpu then
-      {
-        count = vcpu;
-        placement = "static";
-      }
-    else
-      vcpu;
-
   # Host OS detection
   getHostOS =
     system:
@@ -49,7 +27,7 @@
     else if builtins.match "aarch64-.*" system != null then
       "aarch64"
     else
-      "unknown";
+      "";
 
   # Hypervisor type selection
   getHypervisorType =
