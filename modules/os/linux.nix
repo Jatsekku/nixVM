@@ -2,7 +2,11 @@
   lib,
 }:
 {
-  _nixVirtSpec = {
-
+  mkOS = settings: {
+    clock = {
+      kvmclock = {
+        present = true;
+      };
+    };
   };
 }

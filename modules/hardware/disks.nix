@@ -21,8 +21,8 @@ let
         description = "Path to the disk image or block device.";
       };
       serial = mkOption {
-        type = str;
-        default = "";
+        type = nullOr str;
+        default = null;
         description = "Optional serial number for the disk.";
       };
       bus = mkOption {

@@ -52,6 +52,29 @@ in
       {
         name = vmCfg.name;
 
+        clock = {
+          offset = "utc";
+          timer = [
+            {
+              name = "rtc";
+              tickpolicy = "catchup";
+            }
+            {
+              name = "pit";
+              tickpolicy = "delay";
+            }
+            {
+              name = "hpet";
+              present = false;
+            }
+          ];
+        };
+
+        features = {
+          acpi = { };
+          apic = { };
+        };
+
         os = {
           boot = [
             { dev = "hd"; }

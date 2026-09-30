@@ -2,6 +2,8 @@
   ./hardware/cpu.nix
   ./hardware/disks.nix
   ./hardware/displays
+  ./hardware/host-devices
+  ./hardware/network
   ./hardware/ram.nix
   ./os
   ./uuid.nix

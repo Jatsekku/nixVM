@@ -23,7 +23,7 @@ let
     };
   };
 
-  spiceOptions = {
+  spiceModule = submodule {
     options = {
       port = mkOption {
         type = nullOr int;
@@ -64,10 +64,6 @@ let
     };
   };
 
-  defaultSettings = mapAttrs (name: opt: opt.default) spiceOptions.options;
-in
-{
-  module = submodule spiceOptions;
   mkGraphic =
     settings:
     let
@@ -109,4 +105,15 @@ in
         ];
       };
     };
+
+  mkSpiceDisplays =
+    displays:
+    let
+      spiceDisplays = filter (d: d ? spice) displays;
+    in
+    lib.foldl' (acc: x: acc // x) { } (map (d: mkGraphic d.spice) spiceDisplays);
+in
+{
+  module = spiceModule;
+  mkNixVirtSpec = mkSpiceDisplays;
 }

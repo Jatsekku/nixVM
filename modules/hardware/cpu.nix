@@ -16,6 +16,16 @@ let
 
   hostSystem = pkgs.stdenv.hostPlatform.system;
   hostArch = getHostArch hostSystem;
+
+  # 'f' stands for facter
+  freport = hostConfig.nix-vm.facter.report or { };
+  fhardware = freport.hardware or { };
+  fcpu = fhardware.cpu or [ ];
+  fcpu0 = if fcpu != [ ] then head fcpu else { };
+  fsiblings = fcpu0.siblings or 0;
+  fcores = fcpu0.cores or 0;
+  /*nixfmt:enable*/
+  hostThreadsPerCore = if (fsiblings > 0) && (fcores > 0) then fsiblings / fcores else null;
 in
 {
   options = {
@@ -36,7 +46,17 @@ in
       cores = mkOption {
         type = ints.positive;
         default = 2;
-        description = "Number of vCPU cores allocated to the VM";
+        description = "Number of cores allocated to the VM";
+      };
+      sockets = mkOption {
+        type = ints.positive;
+        default = 1;
+        description = "Number of physical CPU sockets allocated to the VM";
+      };
+      threads = mkOption {
+        type = nullOr ints.positive;
+        default = hostThreadsPerCore; # Use host architecture as default
+        description = "Number of threads per core";
       };
       machine = mkOption {
         type = nullOr str;
@@ -65,8 +85,17 @@ in
         cpu = {
           # Mimic host's physical CPU
           mode = "host-passthrough";
+          check = "none";
           # Drop VM live-migration but increase performance
           migratable = false;
+        }
+        // optionalAttrs (vmCfg.cpu.threads != null) {
+          topology = {
+            cores = vmCfg.cpu.cores / vmCfg.cpu.threads;
+            dies = 1;
+            sockets = vmCfg.cpu.sockets;
+            threads = vmCfg.cpu.threads;
+          };
         };
 
         vcpu = {

@@ -3,6 +3,7 @@
   lib,
   pkgs,
   nixvirt,
+  looking-glass,
   ...
 }:
 
@@ -25,11 +26,21 @@ let
   };
 in
 {
+  imports = [
+    ./looking-glass.nix
+  ];
+
   options.nix-vm = {
     vms = mkOption {
       type = attrsOf vmSubmodule;
       default = { };
       description = "VMs definition";
+    };
+
+    hostResources = mkOption {
+      type = attrs;
+      default = { };
+      description = "Global resources computed by host modules to be shared with VMs.";
     };
 
     facter = {

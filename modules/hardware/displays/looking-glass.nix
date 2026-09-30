@@ -1,4 +1,8 @@
-{ lib, hostConfig }:
+{
+  lib,
+  hostConfig,
+  name,
+}:
 with lib;
 with builtins;
 with types;
@@ -29,12 +33,12 @@ let
     fhardware = freport.hardware or { };
       fmonitor = fhardware.monitor or [ ];
         fmonitor0 = if fmonitor != [ ] then head fmonitor else { };
-          detail = fmonitor0.detail or { };
-            monitorWidth = detail.width or 1920;
-            monitorHeight = detail.height or 1080;
+          fdetail = fmonitor0.detail or { };
   /*nixfmt:enable*/
+  monitorWidth = fdetail.width or 1920;
+  monitorHeight = fdetail.height or 1080;
 
-  lookingGlassOptions = {
+  lookingGlassModule = submodule {
     options = {
       width = mkOption {
         type = ints.unsigned;
@@ -64,10 +68,32 @@ let
         default = true;
         description = "Whether to use KVMFR for this display";
       };
+
+      shared = mkOption {
+        type = bool;
+        default = true;
+        description = "Whether display should be sahred aacross VM";
+      };
     };
   };
+
+  mkLookingGlassDisplays = _:
+  let
+      # It's global resource so has to be pulled from top entry point
+      nixVirtSettings = hostConfig.nix-vm.hostResources.looking-glass.nixVirtSettingsFor.${name};
+      qemuCommandLineArgs = concatMap (s: s.qemuCommandLineArgs or [ ]) nixVirtSettings;
+      sharedMemory = concatMap (s: s.sharedMemory or [ ]) nixVirtSettings;
+    in
+    { }
+    // optionalAttrs (qemuCommandLineArgs != [ ]) { qemu-commandline = { arg = qemuCommandLineArgs;}; }
+    // optionalAttrs (sharedMemory != [ ]) {
+      devices = {
+        shmem = sharedMemory;
+      };
+    };
+
 in
 {
-  module = submodule lookingGlassOptions;
-  mkGraphic = settings: { };
+  module = lookingGlassModule;
+  mkNixVirtSpec = mkLookingGlassDisplays;
 }

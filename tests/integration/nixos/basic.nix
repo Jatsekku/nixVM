@@ -14,6 +14,7 @@ pkgs.testers.nixosTest {
 
     # Define a VM using the options interface
     nix-vm.vms."my-vm" = {
+      os = "windows";
       hardware.ram.amount = "4G";
     };
 

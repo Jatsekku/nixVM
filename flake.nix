@@ -21,6 +21,7 @@
       self,
       nixpkgs,
       nixvirt,
+      looking-glass,
       ...
     }:
     let
@@ -48,6 +49,7 @@
           imports = [
             ./nixos
             nixvirt.nixosModules.default
+            looking-glass.nixosModules.default
           ];
           _module.args = { inherit nixvirt; };
         };

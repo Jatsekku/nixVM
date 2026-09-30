@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790586626,
-        "narHash": "sha256-vFtUqDNRhga6TXp9JWWJnPHAJfzWNCqevj4qEdxEq70=",
+        "lastModified": 1790857167,
+        "narHash": "sha256-n2MHb/9XxVfuJp6ivz1X5q/vpTcGY1Nf/mrruumRfTY=",
         "owner": "Jatsekku",
         "repo": "looking-glass",
-        "rev": "d88ef3a9c8fd198bfd815cffcd30efe7ccd95962",
+        "rev": "647eddecd367d6edc285ef4080e8f3bcfdfc36be",
         "type": "github"
       },
       "original": {

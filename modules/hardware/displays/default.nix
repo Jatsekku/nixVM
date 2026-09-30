@@ -2,6 +2,7 @@
   config,
   hostConfig,
   lib,
+  name,
   pkgs,
   ...
 }:
@@ -12,7 +13,7 @@ let
   cfg = config.hardware;
 
   backends = {
-    looking-glass = import ./looking-glass.nix { inherit lib hostConfig; };
+    looking-glass = import ./looking-glass.nix { inherit lib hostConfig name; };
     spice = import ./spice.nix { inherit lib; };
   };
 
@@ -33,7 +34,18 @@ let
   };
 
   filterEmptyBackends =
-    displays: map (display: lib.filterAttrs (name: val: val != null) display) displays;
+    displays:
+    map (
+      display:
+      let
+        filtered = lib.filterAttrs (_: val: val != null) display;
+        backendNames = attrNames filtered;
+      in
+      if length backendNames != 1 then
+        throw "Each display must have exactly one backend defined!"
+      else
+        filtered
+    ) displays;
 
 in
 {
@@ -51,23 +63,7 @@ in
     _nixVirtSpec =
       let
         vmCfg = config._internalVmConfig;
-
-        mkGraphic =
-          display:
-          let
-            attrsNames = attrNames display;
-            backendName =
-              if length attrsNames != 1 then
-                throw "Each display must have exactly one backend defined!"
-              else
-                head attrsNames;
-            settings = display.${backendName};
-            builder = backends.${backendName}.mkGraphic;
-          in
-          builder settings;
-
-        mkGraphics = displays: lib.foldl' (acc: x: acc // x) { } (map mkGraphic displays);
       in
-      mkGraphics vmCfg.displays;
+      foldl' lib.recursiveUpdate { } (map (b: b.mkNixVirtSpec vmCfg.displays) (attrValues backends));
   };
 }
